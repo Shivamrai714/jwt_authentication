@@ -1,0 +1,921 @@
+//Install the plugin in the intellij idea version .
+To create the spring boot project :
+
+@Spring Tool Suite : 
+
+But we are following the sts for the developement purpose.
+
+::::::::::::    JWT-AUTHENTICATION CONCEPTS ::::::::::::::;;
+
+
+JSON WEB TOKEN ( JWT ) :
+
+- no concepts of cookeies, session , etc
+
+  -its is an encrypted platform to securely send the information beteen the two parties.
+
+* Json web token is used to authenticate users.
+---------------------------------
+
+WORKING 
+
+-----------------
+
+* THE basic functionality if JWT is to protect the all url , unless client access then with the Header token.
+
+ When the client first time access the url, the jwt verifies the user ,  and  a token is assigned to it, the client(browser) save the token in its localStorage , and next time when it makes request to url , it send the Header of token along with the request.
+
+ The Jwt verifies the token, and if it matches with allowed user , then grant access to it.
+
+
+The format to the token is 
+ "Bearer 454sdfsdfs5f45sd9979794sdf"
+To send it vai POSTMANT , need to be passed in HEader Tab with key as Authorization, and val as above format.
+
+ _------------------------------
+
+
+STEPS used in JWT working :
+
+check the jwt is well formed or not.
+check signature.
+validate the standard claims
+check the client permission.
+
+-----
+Authentication : to check the validatity , whoom they claim to be.
+
+Authorization : giving the permission to access a specific resource.
+
+__________________________________
+
+
+
+***********************************************
+
+Working of JWT 
+
+1 time when the client request the server , a token is generated. The server response with the JWT token 
+The client save the token in the localstorager.
+
+When next time the client the request , its also send the token with it . So server will check the token authentication .
+
+(Just like ID card, first time id created , next time ownward , allowed to access the resource by validating the id card. )
+
+
+The encode information contains the header(algo used , type ) , payload (data) , signature .
+
+// To implement the jwt , create the project in sts ( i prefered )
+
+Create the jwt authentiacation project.
+
+dependencies -----
+
+import devtools dependency (auto reload )
+import spring web .
+import spring security : user , password gen : on console.
+
+
+
+Video 72 : creating the jwt project.
+
+
+
+TO access the API present in the website. client need to generate the token.
+
+The is of format key and value 
+Authorization    : 
+"Bearer 45645465xdcfsdf1231857asdff48"
+
+Lets we are accessing use the postman as the client . 
+Go to Header Tab Section and add new key : Authorization and values as : Bearer 4546854sd54654
+
+
+Now by default all the url are hidden, need to make a security configuration class , to allow public access to some url and protect others .
+
+____________________________________
+
+STEP : 1 Make security Config class
+
+Annotate with @Configuration , @EnableWebSecurity 
+extends the WebSecurityConfigurer adapter.
+
+Override its two configure methods with different arguments . (Polymorphism)
+
+void configure(HttpSecurity )   --> to allow url to public and which url to be authenticated.
+
+void configure( AuthenticationManagerBuilder auth ) --->with authentication system to use, UserDetailsService , in memory , etc : ie validation on which method.
+
+-----
+
+Need to implement the UserDetailsService interface in CustomUserDetails Service.
+
+Also need to override its load by username method.
+
+Basically when configure  methods works, it loads the user with given user name;
+
+* we have configured the Http method and the Authentication Manager configure methods.
+
+
+Now we need to create the token on the first request.
+
+so include the jwt dependecy first.
+<!-- jjwt dendency STEP :
+   ( if using + JAVA8+ version then also add dependency   of)
+ javax.xml.bind -->
+
+// Now generate the first time token .
+
+Now download the helper class of jwt . from net / github repository.
+And put the downloaded class in helper package as JwtUtil class.
+
+STEP : 6
+
+( This class helps in checking the authentication of the token  using its variousd methods )
+
+
+STEP : 7
+Make the Jwt Controller to generate the token on first requerst of the client.
+
+
+STEP: 8
+To generate the token we need to accept the user sent through POSTMAN in json format
+So make a class with variable as username and password
+
+For authentication purpose we need the 3 object , which need to be autowired.
+
+- Authentication Manager
+- CustomUserDetailsService
+- JwtUtil 
+
+
+Now inside the try catch block , use Authenticate manager , pass obj of UserPasswordAuthenticationToken ( pass username , password )
+
+
+
+Now after successful validation of user identity , token will be generated.
+
+to use the generate token method of Util class ,we need UserDetails Service obj.
+
+So get its obj from the CustomUserDetailsServer.loaduserbyusername method.
+
+then generate token.
+
+STEP : 9
+Now we need to send this token back to client . So using the Response class to send it as json object.
+
+(This is done , so that the cleint can use this token for future purposes) In future the client need to send their requests along with the Header of this Token.
+
+
+
+Structure of token is 
+Bearer sdf454654sdf4s6d4f6s
+
+
+If  client want to access the protected url /api , he need to use Header tab and pass Authorisation and values as token structure .
+
+//STEP 10 :
+
+To test the code is working or not :
+
+OPEn  the POSTMAN :
+
+POST   -  localhost:8080/token
+
+In Body tab under json as type : pass the object  details
+
+{
+  "username" : "Durgesh",
+  "password" :"Durgesh123"
+}
+
+So we will observe the Token generated "dsfgfdg454a65454sdfsd544654654213sdf"
+
+
+Now copy this token , and go to Header Tab and add new {key, value}
+Authorization : Bearer dsfgfdg454a65454sdfsd544654654213sdf
+
+
+This token will help the client to access the protected API .
+
+// WRITING THE CODE FOR Validating the token send from the client side.
+
+//STEP : 11 
+
+Now we will Add filter to check the token of client , who want to access the secured api.
+
+Make a seperate class of JwtAuthenticationFilter and extend the OncePerRequest 
+
+override itsw mwewNow we will Add filter to check the token of client , who want to access the secured apwNow we will Add filter to check the token of client , who want to access the secured api.
+
+
+
+
+
+
+
+
+// Now the token is generated : upon entering the correct username , and password as the provided, in json format.
+
+//So Doing coding to validate the token.  // FILTERING
+
+//overide the method in class and 
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+
+
+// and get the requird header from it. and perform all the validation in it.
+
+
+  //STEP 12:
+           
+         //Now we to use the filter method in Http configure method in SecurityConfig class , we need to define the usernamepasswordauthenticationtoken.
+         
+
+
+Now we can perfom the checks of accessing the protected api using the token generated .
+
+This way THE AWT  concepts helps to keeps api safe and trankit information in the coded form (token) .
+And alowing access to the validated users only.
+
+
+
+STEP : 1    -- To generate the token on POSTMAN
+
+
+
+POST localhost:8080/token
+Body Tab : raw -> JSON 
+
+{
+    "username":"Durgesh",
+    "password":"Durgesh123"
+}
+
+
+STEP 2: to access the api with token v
+
+-copy the token generated above step.
+-Put it in HeaderTab new key Authorization with format of value as 
+key : Authorization
+value: Bearer 5645454sadfas5d4fa54sdf65a4 
+
+
+Make request 
+POST localhost:8080/secondtest     
+
+
+//Hence Proved Success .
+
+
+//Now adding the proper unauthorised response.
+
+Need to create the class, which extend AuthenticationEntry points.
+
+
+Just override the method 
+
+and use it in the Configure method : 
+
+.exceptionHandling().authenticationEntryPoint(entryPoint);
+      ;
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+VIDEO 74 : Now using the JWT authentication : 
+         WITH FRONTEND ANGULAR (login app )
+
+
+--> Go to angular folder under the E drive, springboot , learning of springcore , angular 
+--> As angular is already installed , so create new project .
+--> ng new loginapp         --> to create the new project.  
+   (choose routing , CSS )
+--> go inside the project folder and to run type 
+ ng serve
+
+
+Now to enable the angular materail in our project :
+
+ng add @angular/material
+
+Say yes to all option , choose theme etc
+
+__________________________________________
+
+Now can google angular matrial website and can use the buttons. toogleside bar etc.
+
+
+Now what ever u want to use add its import and refer the email.gui project for more reference , and watch durgesh video.
+
+
+-- If errors comes in writing the componets inside the router [] , in module.ts file . 
+Then import the required component at the top.
+
+
+Now we can add the <a> tags in the button,  and also user routerLink to jump to related url.
+
+To shift the Login to right side we have added a class in css and flex 1 1 auto;
+
+
+___________________________________________________
+
+Now use Bootstrap grid system to centre items.
+
+and open github website , see demo and NPM tag and then copy the cdn code from here.
+and include the link in index.html file 
+
+
+
+Now include the code in homecomponent.html
+
+
+To use the phots save them in asset folder. open it in file explorer and pasete them.
+
+
+After desingning the form :
+
+
+Need to do coding in the typescript file of the form.ts
+
+To get the data  in the field we user property and event binding together .using ngModel in the required input field.
+[] - property  binding 
+() - event binding
+
+   [(ngModel)]="credentials.username"      used for two way event binding.
+
+Before binding the field , give the  name="username" to the fields .also add requireed to the field (so cant be submitted empty)
+
+STEP : 12 :
+
+//generate the token  for the client 
+//START THE SPRING boot project of JWT authentication
+//STEP : 12 : with respect to our JWt Project : we need to fire http:localhost:8080/token
+
+POST METHOD 
+localhost:8080/token
+
+We need to send the json data 
+{
+  "username": "sdf",
+  password:"123454"
+}
+
+
+//STEP 13 :
+
+So in angular we need to create the service , 
+create the services folder in src/app 
+and then genareate the service
+
+ng g service loginservice
+
+
+
+Now do coding in the ts file of login service.
+
+TO call the server we are using the http client by importing it.
+
+Provide the var of HttpClient in constructor .
+
+
+
+: WE design the generateToken() method , to generate the request to create token.
+
+
+Now from our login page , we call this login , method to generate the token.
+
+
+STEP : 14 Go to Springboot project and add the @CrossOrigin in the mail Jwt Controller
+
+To run this project from the angular.
+
+
+
+//STEP :" 15  "   Check the working with Form : Since we had already connected out application with the database, so we are using the MQSQL client to check the username ,and password, 
+//Upon submission , a token is generated on console.
+ 
+__________________________________________________
+
+
+Now after saving the token , in the localstorage , we can redirct to other page.
+
+//But we need to keep user on dashboard page till it has the valid token , So use the auth gaurd
+
+
+in services folder , genearte the guard
+
+ng g guard auth
+
+It has the method to allow visiblity of pages
+
+First declare the obj LoginService in constuctor of auth guard.
+
+Now  apply this auth guard , in app.module.js 
+as canActivate:[AuthGuard]
+
+now in guard.js file , include the obj of Router in cnstr
+
+______________________________________
+
+TO test the application : 
+
+* Run spring boot application :
+* start the angulare project -loginapp by command of vs code terminal .
+ng serve
+
+Now u can login it  , and admin panel will be accessed , if user is valid in database.
+
+Click the logout button to remove out from the app.
+
+________________________________________________ 
+
+
+Now we want to check whether the valid person is able to check the protected url .
+
+So creating the another service.
+
+ ng g service user
+
+
+ After creating the accessing elements in Login service.
+ when we try to access the getUsers url it will be not allowed , so need to do some modification in spring boot code
+
+ In Controller class, containing the this mnethod we need to put @Crossorigin(origin *)
+
+Also need to Make seperate functionmality to send the header with the token to allow access.
+
+
+
+______________________________________________
+
+
+Now we will make a interceptor : which every time add the header authorization in it.
+
+Make a new file :::: auth.interceptor.ts file   in services folder.
+
+
+Add coding of interceptor to add the header to each request.
+
+Now app.module.ts  --- 
+
+in providers:[]   , add the privade:HTTP_INTERCEPTOR,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////
+
+VIDEO 75 : CONNECTING THE DATABASE with  JWT authentication project.
+
+*********************
+((Done coversion from fake service to database service beforer video 74 : Making the Angular Login page.))
+
+
+We will made model classes : 
+
+@Entity
+User  --  all field username, pass, role etc  
+
+Also make a CustomUserDetails class, which interacts will User and return the various method of User.
+
+- also declare the User object in this class, 
+and make Constructor of the class.
+
+and in other methods return the user.pass etc respective fields.
+
+
+__________________________________
+
+Now come to CustomUserDetailsSErvice Class and comment out the old code for fake User .
+
+Create the Dao repository to get user from the database.
+-provide the custom finder method to getUser
+
+Now come back to CustomUserDetailsService 
+-autowire the userRepo
+
+and fetch the obj from the database and return the  CustomUserDetails obj.
+____________________________________
+
+After this re run the springboot app and see the MYSQL workbench the table will be created .
+
+Now we can add data from the registratioon form (like done in Phonebook project) .
+
+or for leaning purpose, 
+In main class of this project , @SpringBootApplication 
+
+we create the User , for demo purpose.
+
+
+
+___________________________________________
+
+Now to test this we can use the POST MAN
+
+
+Look the MYSQL client for the purpose getting the username and password.
+Now make request to generate Token : 
+Copy that token to generate the protected Url
+
+
+
+
+
+
+
+
+
+
+
+
+19/01/2021
+06/01/2022
+
+
+Stmt : 04/02/2022
+
+REVISION JWT :
+
+Structure :
+
+1 com.jwt  -base class , used to fakey inject user to database using the command line runner
+
+         com.jwt.config
+                   -MySecurityConfig      (configure(http)  , configure(auth))
+                   -JwtAuthenticationFilter (dofilter internal)
+                   -JwtAuthenticationEntryPoint (error sending)   
+         com.jwt.controller
+                   -HomeController (welcome , getuser)
+                   -JwtController ( generateToken , loaduserByUsername,authenticate )
+         com.jwt.helper
+                   -JwtUtil (downloaded from net)
+         com.jwt.model
+                   -CustomUserDetails(to pass userdefind user to check auth)
+                   -JwtRequest (username,pass)
+                   -JwtResponse (token send as obj)
+                   -User (store entity in DB)
+         com.jwt.repo
+                   -UserRepository(finduser from DB)
+         com.jwt.service
+                   -CustomUserDetailsService(service to fetch and compare user)
+
+
+
+
+Deploy z fake list book
+
+@ReqestMapping("/api/v1")
+
+open cmd in our project directory.
+
+chaged java version  to 1.8
+
+
+
+
+(my-feature)$ git checkout master
+Switched to branch 'master'
+(master)$
+
+
+------------------------------------------------------
+
+DURGESH GIT IN 1 VIDEO ::::::::::::::::::::
+
+
+NOTES    Gits :
+
+$ git --version
+$   git config --global user.name "Shivam"
+
+$ git config --global user.email "shivamraiias@gmail.com"
+
+Create a project folder
+To open vs code from direclty cmd in current project.
+code vs .
+
+$ git init
+
+$ git status
+
+$ git add index.html
+
+$ git commit -m "first commit"
+
+****  git add -A             : to add all files
+
+
+$ git checkout about.html   : to remove / undo the changes befor the previous commit.
+
+//To see the changes made to modified file (not added to git, nor commited )
+use
+git diff
+
+--to see changes after adding to git use :
+git diff --staged
+
+--to see changes after commmit done
+git diff HEAd
+
+----- author who is doing changes
+git show 
+
+--------to show previous commits
+git log
+
+-------previous two changes
+git log -p -2
+
+---------------------------------------------
+
+To delete file permenetly
+
+git rm -f service.html
+
+-- only remove it staging area(make it untack)
+git rm --cached service.html
+
+______________________________________
+
+BRANCHING
+to see all branches present.
+$ git branch --list
+
+-to crate a new branch
+git branch login
+
+-to move to another  brach
+git checkout login 
+
+- to delete a subbranch , without its merged
+git branch -D login2
+
+
+--to merge sub branch into main
+  Go to parent branch
+
+$ git merge login
+
+--to delete sub brach after merging the data
+
+$ git branch -d login
+
+_______________________________
+
+New method to create branch and swtich it
+
+git checkout -b register
+
+Search from net command to dirclty add and commit
+
+
+
+----------------------------------------------
+
+Learning to Work on Github from the git
+
+- Go to the github account , create a new repository.
+- Copy the link and open the GitBash from the folder , of the project.
+-git init
+-Now add the files to remote github using 
+
+remote add origin https://github.com/Shivamrai714/learninggit.git
+
+
+-- to check current active url 
+   git remove -v
+
+--Come to the main branch master and rename it to main (acc to the repository).
+
+branch -M "main"
+
+To load all the code to github
+---git push -u origin "main"
+
+Now click on the repository , you can see the files uploaded there.
+
+// Now lets try to add new brach
+git branch register
+
+// Change branch
+git checkout register
+
+// Do coding changes to the file fomr the vs code.
+//add the files
+git add -A
+
+//commit the changes 
+git commit -m "updating data"
+
+//now again push  the whole brach "register" to  github  repo.
+
+$ git push -u origin register
+
+NOW WE CAN SWITCH THis branches on github
+______________________________________________
+
+
+Pull the request from GitHub WEbsite
+
+From GitHub repository , copy the link of Repo
+
+Create a new folder to extract the files.
+Go to that project folder.
+
+git clone https://github.com/Shivamrai714/learninggit.git
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+____________________
+
+
+AFTER LEARNING THE GIT COMMAND , I WAS SUCCESSFULL IN DEPLOYIG MY APPLICATION TO THE HEREUKU
+
+- TO CORRECTLY DEPLOY THE PROJECT 
+    1. delete the old folder of the git from the project directory.
+    2. Change java version of Heruku to 1.8
+    3. Create a  App on the Heruku and follow the instruction for the deploy.
+    4.Go to project explorer from the currrent sts project., then inside the project,
+    5.Now open the cmd 
+
+    //FOllOW STEP from deploy Tab :
+
+a)  heroku login -i               (login from cmd , provide id shivamraiias@gmail.com,passShivamrai714@)
+
+b) $ heroku git:clone -a springbootdeploytesting 
+
+c)$ cd springbootdeploytesting
+
+d)$ git add .
+
+e)$ git commit -am "make it better"
+
+f).$ git push heroku master
+
+To accewss your project go to Setting Tab bottom link , to run your project.
+
+Click link
+Now append the api/v1/books to see the results.
+
+Use postman with complete link to add the products etc  on the server.
+
+(ALL WORKED FINE  ............)
+
+
+
+
+
+
+
+______________________________________________________________________________________________________
+
+NOW learning to upload the springboot with the  database on heruku .....
+
+Open the project of fakelist of Mobiles ;
+
+Need to attach posgres dep in the  pom.xml 
+Need to update the application.properties file
+
+
+
+Open Pg (Postgres) software
+
+______________________________________________________________________________________________________
+
+Deploying the springboot mobile with the database on postgres
+
+Create new Project on the Heruku .
+Add the resource : Heruku POSTGRES 
+Open the created link. 
+Now open the setting , and change the url, database etc according to the heruku settings.
+
+copy the host and paste them in the application.properties of the file.
+
+--Heruku CLI is used to connect the Heruku postgrs to out localdatabase of postgres.
+
+
+
+Now after the full process ,
+open the curent folder of springboot from CMD , deploy the project on server using the previus commands .
+
+Open the link of project form the settting of project.
+
+Use POSTMAN to add the mobiles first then do further operation.,
+
+
+
+
+If also want to save the entries in the localPostGre Db use the CLI command like this from the CMD of the current project.
+
+But before this set the path of psql in envn var.
+
+Check the cmd and check : psql 
+if it ask for pass, then path is set otherwise set the path of the bin (of POSTgres) in envm var. 
+
+otherwise it will show not recogised as internal or extenal command.
+
+(In my case I need to set the path)
+
+After then start new cmd . 
+And copy paste the CLI code of Heruku Database,
+
+
+VERY IMP THING ............. I changed the port of local postgres ,  to 3308 , but when u are connecting the local posgres to heruku postgres the port no should be same  5432
+
+
+Connecting the local posgres to heruku posgres
+AFTER THis
+COpy this CLI from online heruku -> resouces -> setting -> HERUKU CLI
+
+If cmd responds with Password ,on typing the psql in cmd, then run this copied HERUKU CLI command.
+
+(otherwise first need to set up the path.)
+
+
+
+ 
+-------------------------------------
+
+
+Now u can se the current client of online server from local cmd machine.
+
+/dt will show the userdetails here.
+
+Also to see the data of the online posgres from here just
+
+select * from mobilee 
+
+you can try this , by updating the data from the POSTMAN , and then seeing updates here
+
+MEANS OUR HERUKU posgres is now connnected with local posgress.
+
+
+
+
+Commands to see the data on the cmd.
+
+\dt                --to see all the tables
+\d mobbile             -- to see description of tabl
+
+
